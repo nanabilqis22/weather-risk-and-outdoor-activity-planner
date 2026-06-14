@@ -2,59 +2,48 @@ import re
 from weather_client import Forecast
 
 class ActivityRiskAnalyzer:
-    def analyze_risk(self, forecast: Forecast, activity: str) -> str:
+    def analyze_risk(self, forecast: Forecast, activity: str) -> dict:
         """
-        Evaluates weather conditions against the planned activity to determine risk level.
-        Returns: 'Low Risk', 'Moderate Risk', or 'High Risk / Avoid'
+        Uses explicit conditional logic to evaluate base safety metrics.
         """
-        print(f"[Analyzer] Evaluating conditions for: {activity}...")
-        
         condition = forecast.condition.lower()
         temp = forecast.temperature
-
-        # Severe weather rules
-        if "thunderstorm" in condition:
-            return "High Risk / Avoid (Danger of lightning strikes outdoor)"
         
-        if "rainy" in condition:
-            # High impact outdoor sports are unsafe in rain
-            if any(sport in activity.lower() for sport in ["football", "basketball", "tennis", "cycling"]):
-                return "High Risk / Avoid (Slippery surfaces and poor visibility)"
-            return "Moderate Risk (Bring protective rain gear)"
-
-        # Temperature rules
-        if temp > 38:
-            return "High Risk / Avoid (Extreme heatwave warning)"
-        elif temp > 30:
-            return "Moderate Risk (High temperature, stay hydrated)"
-        elif temp < 10:
-            return "Moderate Risk (Chilly weather, dress warmly)"
+        # Base safety determination rules
+        if "thunderstorm" in condition or temp > 40 or temp < 5:
+            assessment = "Should be Avoided"
+            advice = "Conditions present immediate environmental hazards. It is highly advised to cancel or move indoors."
+            best_time = "Not recommended for today"
+        elif "rainy" in condition or temp > 33 or temp < 12:
+            assessment = "Risky / Manageable with caution"
+            advice = "Suboptimal elements present. Dress appropriately, bring protective gear, and monitor changing skies."
+            best_time = "Late afternoon if elements calm down"
+        else:
+            assessment = "Completely Safe"
+            advice = "Atmospheric conditions match outdoor recreation requirements perfectly. Have fun!"
+            best_time = "Morning or early evening hours"
             
-        return "Low Risk (Conditions look beautiful for this activity!)"
-
+        return {"assessment": assessment, "advice": advice, "best_time": best_time}
 
 class RecommendationEngine:
-    def generate_checklist(self, activity: str, risk_level: str) -> list:
+    def generate_checklist(self, activity: str, assessment: str) -> list:
         """
-        Uses Regular Expressions to sanitize the activity string, 
-        then builds a customized safety packing list.
+        Applies Regular Expressions to scrub data and structures a packing inventory.
         """
-        # Use Regex to remove any numbers or symbols from the activity string
-        clean_activity = re.sub(r'[^a-zA-Z\s]', '', activity).strip().lower()
+        # Clean text: remove numbers and special symbols
+        clean_act = re.sub(r'[^a-zA-Z\s]', '', activity).strip().lower()
         
-        # Default packing items
-        checklist = ["Water bottle", "Fully charged phone"]
+        checklist = ["Water bottle", "Charged cell phone", "Identification card"]
         
-        # Add items based on risk level keywords
-        if "avoid" in risk_level.lower():
-            checklist.append("Indoor backup venue plan")
-        elif "moderate" in risk_level.lower():
-            checklist.append("First-aid kit copy")
+        if "avoid" in assessment.lower() or "risky" in assessment.lower():
+            checklist.append("Emergency umbrella / rain coat")
+            checklist.append("Indoor location alternative key")
             
-        # Add items based on the specific activity type
-        if any(word in clean_activity for word in ["football", "basketball", "sports", "run"]):
-            checklist.extend(["Athletic shoes", "Towel", "Electrolyte drink"])
-        elif any(word in clean_activity for word in ["picnic", "park", "relax"]):
-            checklist.extend(["Sitting mat", "Snacks", "Sunscreen"])
+        if any(w in clean_act for w in ["football", "jogging", "sports", "running"]):
+            checklist.extend(["Athletic footwear", "Towel", "Electrolytes"])
+        elif any(w in clean_act for w in ["farming", "garden"]):
+            checklist.extend(["Working gloves", "Sturdy boots", "Sun protective hat"])
+        elif any(w in clean_act for w in ["picnic", "travelling", "event"]):
+            checklist.extend(["Sitting sheet", "Packed snacks", "Sunscreen cream"])
             
         return checklist
