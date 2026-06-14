@@ -1,22 +1,20 @@
 from weather_client import WeatherClient
 from analyzer import ActivityRiskAnalyzer, RecommendationEngine
 
-def save_to_history(location: str, activity: str):
+def save_to_history(location: str, activity: str, condition: str, temp: float, risk: str):
     """
-    Task: Save user searches locally using File Handling.
-    Appends the location and activity to 'search_history.txt'.
+    Saves user searches and the live results locally using File Handling.
     """
     try:
-        # 'a' means append mode, so it keeps old data and adds new data to the end
         with open("search_history.txt", "a") as file:
-            file.write(f"Location: {location} | Activity: {activity}\n")
-        print("[System] Search saved successfully to 'search_history.txt'.")
+            file.write(f"Location: {location} | Activity: {activity} | Weather: {temp}°C, {condition} | Risk: {risk}\n")
+        print("[System] Search log successfully saved to 'search_history.txt'.")
     except Exception as e:
         print(f"[Error] Could not save to history: {e}")
 
 def view_history():
     """
-    Task: Read and display the saved search history file.
+    Reads and displays the saved search history file.
     """
     print("\n--- Saved Search History ---")
     try:
@@ -31,9 +29,14 @@ def view_history():
     print("----------------------------\n")
 
 def main():
+    # Initialize the engine modules you built
+    client = WeatherClient()
+    analyzer = ActivityRiskAnalyzer()
+    engine = RecommendationEngine()
+    
     while True:
         print("\n=== Weather Risk & Outdoor Activity Planner ===")
-        print("1. Plan an Activity")
+        print("1. Plan an Activity (Live Data)")
         print("2. View Search History")
         print("3. Exit")
         
@@ -47,13 +50,36 @@ def main():
                 print("[Warning] Location and Activity cannot be blank!")
                 continue
                 
-            print(f"\n[Processing] Location: {location}")
-            print(f"[Processing] Activity: {activity}")
+            # 1. Fetch live API weather data
+            forecast = client.fetch_forecast(location)
             
-            # Save this data to your local text file
-            save_to_history(location, activity)
+            if forecast is None:
+                print("[System] Could not process planning due to weather service error.")
+                continue
+                
+            # 2. Run the logical rule checks
+            risk_level = analyzer.analyze_risk(forecast, activity)
             
-            print("\n[System] (Note: Weather analysis will display once your teammates complete their files!)")
+            # 3. Clean string with Regex and build the checklist
+            checklist = engine.generate_checklist(activity, risk_level)
+            
+            # 4. Print Results beautifully to user terminal screen
+            print("\n==============================================")
+            print(f"☀️ LIVE WEATHER REPORT FOR: {location.upper()}")
+            print(f"-> Temperature: {forecast.temperature}°C")
+            print(f"-> Condition: {forecast.condition}")
+            print(f"-> Wind Speed: {forecast.wind_speed} km/h")
+            print("==============================================")
+            print(f"📋 RISK ASSESSMENT FOR: '{activity}'")
+            print(f"-> Result: {risk_level}")
+            print("==============================================")
+            print("🎒 RECOMMENDED SAFETY PACKING CHECKLIST:")
+            for item in checklist:
+                print(f" [ ] {item}")
+            print("==============================================\n")
+            
+            # Save all the live details to your local file history
+            save_to_history(location, activity, forecast.condition, forecast.temperature, risk_level)
             
         elif choice == "2":
             view_history()
