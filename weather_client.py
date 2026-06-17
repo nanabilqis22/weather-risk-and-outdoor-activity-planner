@@ -6,6 +6,7 @@ class WeatherClient:
 
     def get_coordinates(self, location):
         url = f"https://geocoding-api.open-meteo.com/v1/search?name={location}"
+
         response = requests.get(url)
         data = response.json()
 
@@ -34,7 +35,5 @@ class WeatherClient:
         return Forecast(
             temperature=temp,
             wind_speed=wind,
-            precipitation=0,
-            latitude=lat,
-            longitude=lon
+            precipitation=0
         )
