@@ -1,0 +1,62 @@
+[
+    {
+        "location": "Abuja",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "kaduna",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "kano",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "kano",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "Abuja",
+        "activity": "Picnic",
+        "risk": "Safe"
+    },
+    {
+        "location": "kaduna",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "minna",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "lagos",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "lagos",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "kaduna",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "Abuja",
+        "activity": "Football",
+        "risk": "Safe"
+    },
+    {
+        "location": "KADUNA",
+        "activity": "Football",
+        "risk": "Safe"
+    }
+]
