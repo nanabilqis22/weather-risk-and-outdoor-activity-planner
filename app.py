@@ -16,52 +16,7 @@ st.set_page_config(
 )
 
 # ---------------------------
-# UI STYLE
-# ---------------------------
-st.markdown("""
-<style>
-body {
-    background-color: #0b1220;
-}
-
-.title {
-    font-size: 34px;
-    font-weight: 800;
-    text-align: center;
-    color: white;
-}
-
-.subtitle {
-    text-align: center;
-    color: #94a3b8;
-}
-
-.card {
-    background: #111827;
-    padding: 18px;
-    border-radius: 15px;
-    color: white;
-    margin-top: 10px;
-}
-
-.metric {
-    background: #0f172a;
-    padding: 15px;
-    border-radius: 12px;
-    text-align: center;
-    color: white;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ---------------------------
-# TITLE (KEEP EXACT NAME)
-# ---------------------------
-st.markdown('<div class="title">🌦 Weather Risk & Outdoor Activity Planner</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Global Weather Safety Dashboard</div>', unsafe_allow_html=True)
-
-# ---------------------------
-# FILES
+# FILE SETUP
 # ---------------------------
 if not os.path.exists("history.json"):
     json.dump([], open("history.json", "w"))
@@ -70,7 +25,38 @@ if not os.path.exists("favorites.json"):
     json.dump([], open("favorites.json", "w"))
 
 # ---------------------------
-# CONTROL PANEL
+# UI DESIGN (SaaS STYLE)
+# ---------------------------
+st.markdown("""
+<style>
+.title {
+    text-align:center;
+    font-size:34px;
+    font-weight:bold;
+    color:#1f77b4;
+}
+
+.sub {
+    text-align:center;
+    color:gray;
+    margin-bottom:20px;
+}
+
+.card {
+    background:#f5f7ff;
+    padding:15px;
+    border-radius:12px;
+    margin:10px 0px;
+    box-shadow:0px 2px 8px rgba(0,0,0,0.1);
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="title">🌦 Weather Risk & Outdoor Activity Planner</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub">Global Weather Safety Dashboard</div>', unsafe_allow_html=True)
+
+# ---------------------------
+# INPUTS (CONTROL PANEL STYLE)
 # ---------------------------
 st.sidebar.header("⚙ Control Panel")
 
@@ -111,21 +97,21 @@ if run and location:
         risk = analyzer.analyze(activity, forecast)
 
         # ---------------------------
-        # METRICS
+        # WEATHER DISPLAY
         # ---------------------------
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            st.markdown(f"<div class='metric'>📍 {clean_location}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='card'>📍 {clean_location}</div>", unsafe_allow_html=True)
 
         with col2:
-            st.markdown(f"<div class='metric'>🌡 {forecast.temperature}°C</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='card'>🌡 {forecast.temperature}°C</div>", unsafe_allow_html=True)
 
         with col3:
-            st.markdown(f"<div class='metric'>💨 {forecast.wind_speed} km/h</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='card'>💨 {forecast.wind_speed} km/h</div>", unsafe_allow_html=True)
 
         # ---------------------------
-        # RISK DISPLAY
+        # RISK
         # ---------------------------
         st.subheader("⚠ Risk Analysis")
 
@@ -134,64 +120,52 @@ if run and location:
         elif risk == "Manageable":
             st.warning("🟡 Risk Level: MANAGEABLE")
         else:
-            st.error("🔴 Risk Level: HIGH RISK")
+            st.error("🔴 RISKY")
 
         # ---------------------------
         # ADVICE
         # ---------------------------
-        st.subheader("💡 Safety Advice")
-
         if risk == "Safe":
-            st.write("Weather is good for outdoor activities.")
-        elif risk == "Manageable":
-            st.write("Be careful, conditions may change.")
-        else:
-            st.write("Avoid outdoor activity today.")
-
-        # ---------------------------
-        # BEST TIME
-        # ---------------------------
-        st.subheader("⏰ Best Time")
-
-        if risk == "Safe":
+            advice = "Weather is good for outdoor activities."
             best_time = "Morning or Evening"
         elif risk == "Manageable":
+            advice = "Be careful outdoors."
             best_time = "Morning only"
         else:
-            best_time = "Not recommended"
+            advice = "Avoid outdoor activity."
 
+        st.subheader("💡 Safety Advice")
+        st.write(advice)
+
+        st.subheader("⏰ Best Time")
         st.write(best_time)
 
         # ---------------------------
-        # PACKING LIST
+        # CHECKLIST
         # ---------------------------
         st.subheader("🎒 Packing Checklist")
 
-        items = [
-            "Water Bottle",
-            "Phone",
-            "Comfortable Clothes",
-            "Cap / Hat"
-        ]
+        items = ["Water Bottle", "Phone", "Comfortable Clothes", "Cap"]
 
         if risk != "Safe":
             items.append("Umbrella / Raincoat")
 
-        for item in items:
-            st.write("✔ " + item)
+        for i in items:
+            st.write("✔", i)
 
         # ---------------------------
-        # CHART
+        # 🤖 GEMINI AI (SAFE FALLBACK)
         # ---------------------------
-        st.subheader("📊 Weather Chart")
+        st.subheader("🤖 Gemini AI Assistant")
 
-        st.bar_chart({
-            "Temperature": [forecast.temperature],
-            "Wind Speed": [forecast.wind_speed]
-        })
+        user_question = st.text_input("Ask AI about weather or safety")
+
+        if user_question:
+            st.info("🤖 Gemini AI is currently unavailable. Using system recommendations instead.")
+            st.write(advice)
 
         # ---------------------------
-        # HISTORY
+        # SAVE HISTORY
         # ---------------------------
         history = json.load(open("history.json"))
 
@@ -205,6 +179,16 @@ if run and location:
 
         st.success("Saved to history ✔")
 
+        # ---------------------------
+        # CHART
+        # ---------------------------
+        st.subheader("📊 Weather Chart")
+
+        st.bar_chart({
+            "Temperature": [forecast.temperature],
+            "Wind Speed": [forecast.wind_speed]
+        })
+
     except Exception as e:
         st.error(f"Error: {e}")
 
@@ -216,7 +200,7 @@ st.subheader("⭐ Favorites")
 if st.button("Save Favourite"):
     fav = json.load(open("favorites.json"))
     fav.append(location)
-    json.dump(fav, open("favorites.json", "w"), indent=4)
+    json.dump(fav, open("favorites.json"), "w", indent=4)
     st.success("Saved ✔")
 
 with st.expander("📜 History"):
