@@ -2,7 +2,6 @@ import streamlit as st
 import json
 import os
 import re
-import pandas as pd
 
 from weather_client import WeatherClient
 from analyzer import ActivityRiskAnalyzer
@@ -17,7 +16,7 @@ st.set_page_config(
 )
 
 # ---------------------------
-# SAAS UI DESIGN
+# UI STYLE
 # ---------------------------
 st.markdown("""
 <style>
@@ -35,7 +34,6 @@ body {
 .subtitle {
     text-align: center;
     color: #94a3b8;
-    margin-bottom: 20px;
 }
 
 .card {
@@ -43,7 +41,7 @@ body {
     padding: 18px;
     border-radius: 15px;
     color: white;
-    box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
+    margin-top: 10px;
 }
 
 .metric {
@@ -53,26 +51,17 @@ body {
     text-align: center;
     color: white;
 }
-
-.stButton>button {
-    background-color: #2563eb;
-    color: white;
-    border-radius: 10px;
-    padding: 10px;
-    border: none;
-}
-
-.stButton>button:hover {
-    background-color: #1d4ed8;
-}
 </style>
 """, unsafe_allow_html=True)
 
+# ---------------------------
+# TITLE (KEEP EXACT NAME)
+# ---------------------------
 st.markdown('<div class="title">🌦 Weather Risk & Outdoor Activity Planner</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Global Weather Safety Dashboard</div>', unsafe_allow_html=True)
 
 # ---------------------------
-# FILE SETUP
+# FILES
 # ---------------------------
 if not os.path.exists("history.json"):
     json.dump([], open("history.json", "w"))
@@ -81,7 +70,7 @@ if not os.path.exists("favorites.json"):
     json.dump([], open("favorites.json", "w"))
 
 # ---------------------------
-# SIDEBAR CONTROL PANEL
+# CONTROL PANEL
 # ---------------------------
 st.sidebar.header("⚙ Control Panel")
 
@@ -108,23 +97,21 @@ for i, city in enumerate(cities):
             location = city
 
 # ---------------------------
-# MAIN LOGIC
+# MAIN APP
 # ---------------------------
 if run and location:
 
     try:
         clean_location = re.sub(r'[^a-zA-Z\s,]', '', location)
 
-        # WEATHER
         weather = WeatherClient()
         forecast = weather.get_weather(clean_location)
 
-        # RISK
         analyzer = ActivityRiskAnalyzer()
         risk = analyzer.analyze(activity, forecast)
 
         # ---------------------------
-        # DASHBOARD METRICS
+        # METRICS
         # ---------------------------
         col1, col2, col3 = st.columns(3)
 
@@ -143,14 +130,14 @@ if run and location:
         st.subheader("⚠ Risk Analysis")
 
         if risk == "Safe":
-            st.success("☀ Safe to go outside")
+            st.success("🟢 Risk Level: SAFE")
         elif risk == "Manageable":
-            st.warning("🌤 Moderate risk")
+            st.warning("🟡 Risk Level: MANAGEABLE")
         else:
-            st.error("🌧 High risk")
+            st.error("🔴 Risk Level: HIGH RISK")
 
         # ---------------------------
-        # SIMPLE SAFETY ADVICE
+        # ADVICE
         # ---------------------------
         st.subheader("💡 Safety Advice")
 
@@ -176,7 +163,7 @@ if run and location:
         st.write(best_time)
 
         # ---------------------------
-        # CHECKLIST
+        # PACKING LIST
         # ---------------------------
         st.subheader("🎒 Packing Checklist")
 
@@ -194,6 +181,16 @@ if run and location:
             st.write("✔ " + item)
 
         # ---------------------------
+        # CHART
+        # ---------------------------
+        st.subheader("📊 Weather Chart")
+
+        st.bar_chart({
+            "Temperature": [forecast.temperature],
+            "Wind Speed": [forecast.wind_speed]
+        })
+
+        # ---------------------------
         # HISTORY
         # ---------------------------
         history = json.load(open("history.json"))
@@ -207,16 +204,6 @@ if run and location:
         json.dump(history, open("history.json", "w"), indent=4)
 
         st.success("Saved to history ✔")
-
-        # ---------------------------
-        # CHART
-        # ---------------------------
-        st.subheader("📊 Weather Chart")
-
-        st.bar_chart({
-            "Temperature": [forecast.temperature],
-            "Wind Speed": [forecast.wind_speed]
-        })
 
     except Exception as e:
         st.error(f"Error: {e}")
