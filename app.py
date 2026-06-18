@@ -6,18 +6,14 @@ import re
 from weather_client import WeatherClient
 from analyzer import ActivityRiskAnalyzer
 
-# ---------------------------
-# PAGE CONFIG
-# ---------------------------
-st.set_page_config(
-    page_title="Weather Risk & Outdoor Activity Planner",
-    page_icon="🌦",
-    layout="wide"
-)
 
-# ---------------------------
+# PAGE CONFIG
+
+st.set_page_config(page_title="Weather Risk & Outdoor Activity Planner", page_icon="🌦", layout="wide")
+
+
 # FILE SETUP
-# ---------------------------
+
 if not os.path.exists("history.json"):
     with open("history.json", "w") as f:
         json.dump([], f)
@@ -26,9 +22,9 @@ if not os.path.exists("favorites.json"):
     with open("favorites.json", "w") as f:
         json.dump([], f)
 
-# ---------------------------
+
 # CUSTOM UI
-# ---------------------------
+
 st.markdown("""
 <style>
 .main-title{
@@ -61,9 +57,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------------------
+
 # SIDEBAR
-# ---------------------------
+
 st.sidebar.header("⚙ Control Panel")
 
 location = st.sidebar.text_input(
@@ -85,9 +81,9 @@ activity = st.sidebar.selectbox(
 
 analyze_btn = st.sidebar.button("🚀 Analyze Weather")
 
-# ---------------------------
+
 # QUICK CITIES
-# ---------------------------
+
 st.markdown("### 🌍 Quick Cities")
 
 c1, c2, c3, c4, c5, c6 = st.columns(6)
@@ -116,9 +112,9 @@ with c6:
     if st.button("Abuja"):
         location = "Abuja"
 
-# ---------------------------
+
 # MAIN ANALYSIS
-# ---------------------------
+
 if analyze_btn:
 
     try:
@@ -134,9 +130,9 @@ if analyze_btn:
         analyzer = ActivityRiskAnalyzer()
         risk = analyzer.analyze(activity, forecast)
 
-        # ---------------------------
+       
         # WEATHER OVERVIEW
-        # ---------------------------
+       
         st.subheader("🌤 Weather Overview")
 
         col1, col2, col3 = st.columns(3)
@@ -150,9 +146,9 @@ if analyze_btn:
         with col3:
             st.warning(f"💨 {forecast.wind_speed} km/h")
 
-        # ---------------------------
+       
         # RISK ANALYSIS
-        # ---------------------------
+       
         st.subheader("⚠ Risk Analysis")
 
         if risk == "Safe":
@@ -170,21 +166,21 @@ if analyze_btn:
             advice = "Avoid outdoor activity."
             best_time = "Not Recommended"
 
-        # ---------------------------
+        
         # ADVICE
-        # ---------------------------
+        
         st.subheader("💡 Safety Advice")
         st.write(advice)
 
-        # ---------------------------
+        
         # BEST TIME
-        # ---------------------------
+        
         st.subheader("⏰ Best Time")
         st.write(best_time)
 
-        # ---------------------------
+        
         # CHECKLIST
-        # ---------------------------
+        
         st.subheader("🎒 Packing Checklist")
 
         items = [
@@ -200,9 +196,9 @@ if analyze_btn:
         for item in items:
             st.write("✔", item)
 
-        # ---------------------------
+        
         # GEMINI PLACEHOLDER
-        # ---------------------------
+        
         st.subheader("🤖 Gemini AI Assistant")
 
         user_question = st.text_input(
@@ -215,9 +211,9 @@ if analyze_btn:
             )
             st.write(advice)
 
-        # ---------------------------
+        
         # SAVE HISTORY
-        # ---------------------------
+       
         with open("history.json", "r") as f:
             history = json.load(f)
 
@@ -232,9 +228,9 @@ if analyze_btn:
 
         st.success("Saved to history ✔")
 
-        # ---------------------------
+        
         # CHART
-        # ---------------------------
+        
         st.subheader("📊 Weather Chart")
 
         chart_data = {
@@ -247,9 +243,9 @@ if analyze_btn:
     except Exception as e:
         st.error(f"Error: {e}")
 
-# ---------------------------
+
 # FAVORITES
-# ---------------------------
+
 st.subheader("⭐ Favorites")
 
 if st.button("Save Favourite"):
@@ -264,16 +260,16 @@ if st.button("Save Favourite"):
 
     st.success("Saved ✔")
 
-# ---------------------------
+
 # HISTORY
-# ---------------------------
+
 with st.expander("📜 History"):
     with open("history.json", "r") as f:
         st.json(json.load(f))
 
-# ---------------------------
+
 # FAVORITES LIST
-# ---------------------------
+
 with st.expander("⭐ Favorites"):
     with open("favorites.json", "r") as f:
         st.json(json.load(f))
