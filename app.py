@@ -134,18 +134,70 @@ if analyze_btn:
         # ---------------------------
         st.subheader("🎒 Packing Checklist")
 
-        items = [
-            "Water Bottle",
-            "Phone",
-            "Comfortable Clothes",
-            "Cap / Hat"
-        ]
+        if activity == "Football":
+            items = [
+                "Football boots",
+                "Jersey",
+                "Water bottle",
+                "Shin guards"
+            ]
+
+        elif activity == "Jogging":
+            items = [
+                "Running shoes",
+                "Water bottle",
+                "Fitness tracker",
+                "Towel"
+            ]
+
+        elif activity == "Farming":
+            items = [
+                "Hat",
+                "Gloves",
+                "Boots",
+                "Sunscreen",
+                "Water bottle"
+            ]
+
+        elif activity == "Picnic":
+            items = [
+                "Food",
+                "Water",
+                "Blanket",
+                "Napkins",
+                "Sunscreen"
+            ]
+
+        elif activity == "Travel":
+            items = [
+                "ID Card",
+                "Phone Charger",
+                "Water",
+                "Passport",
+                "Headphones"
+            ]
+
+        elif activity == "Outdoor Event":
+            items = [
+                "Umbrella",
+                "Water",
+                "Sunscreen",
+                "Folding Chair",
+                "Sunglasses"
+            ]
+
+        else:
+            items = [
+                "Water Bottle",
+                "Phone",
+                "Comfortable Clothes"
+            ]
 
         if forecast.precipitation > 0:
-            items.append("Umbrella / Raincoat")
+            items.append("Raincoat")
 
         for item in items:
-            st.write("✔", item)
+            st.write(f"✔ {item}")
 
         # ---------------------------
         # 🤖 GEMINI AI ASSISTANT
@@ -167,10 +219,10 @@ if analyze_btn:
                     risk
                 )
 
-                st.write(ai_response)
+                st.info(ai_response)
 
-            except:
-                st.info("🤖 AI Assistant is currently unavailable")
+            except Exception:
+                st.warning("🤖 AI Assistant is currently unavailable")
 
         # ---------------------------
         # 📊 WEATHER CHART

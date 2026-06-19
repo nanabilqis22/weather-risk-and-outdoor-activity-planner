@@ -1,48 +1,40 @@
 class RecommendationEngine:
-    
-    def get_advice(self, activity, risk):
-
-        advice = {
-            "Safe": "Weather conditions are suitable.",
-            "Manageable": "Proceed with caution.",
-            "Risky": "Be careful and monitor conditions.",
-            "Avoid": "Postpone the activity."
-        }
-
-        return advice.get(risk)
-
     def packing_list(self, activity):
-
         packs = {
-            "Football": [
-                "Water",
-                "Boots",
-                "Sportswear"
-            ],
-            "Jogging": [
+            "running": [
                 "Water bottle",
-                "Running shoes"
+                "Running shoes",
+                "Fitness tracker",
+                "Towel"
             ],
-            "Farming": [
+            "farming": [
                 "Hat",
                 "Gloves",
-                "Boots"
+                "Boots",
+                "Sunscreen",
+                "Water bottle"
             ],
-            "Picnic": [
+            "picnic": [
                 "Food",
                 "Water",
-                "Blanket"
+                "Blanket",
+                "Napkins",
+                "Sunscreen"
             ],
-            "Travelling": [
+            "travelling": [
                 "ID Card",
                 "Phone Charger",
-                "Water"
+                "Water",
+                "Passport",
+                "Headphones"
             ],
-            "Outdoor Event": [
+            "outdoor event": [
                 "Umbrella",
                 "Water",
-                "Sunscreen"
+                "Sunscreen",
+                "Folding chair",
+                "Sunglasses"
             ]
         }
 
-        return packs.get(activity, [])
+        return packs.get(activity.lower(), [])
