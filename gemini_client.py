@@ -1,28 +1,36 @@
 import google.generativeai as genai
 
+API_KEY = "YOUR_GEMINI_API_KEY"
+
+genai.configure(api_key=API_KEY)
+
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+
 class GeminiClient:
 
-    def __init__(self, api_key):
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+    def explain(self, location, activity, forecast, risk):
 
-    def get_response(self, location, activity, forecast, risk, question):
         prompt = f"""
-You are a weather safety assistant.
+        You are a weather assistant.
 
-Location: {location}
-Activity: {activity}
-Temperature: {forecast.temperature}
-Wind Speed: {forecast.wind_speed}
-Risk Level: {risk}
+        Location: {location}
+        Activity: {activity}
 
-User Question: {question}
+        Weather:
+        - Temperature: {forecast.temperature}°C
+        - Wind: {forecast.wind_speed} km/h
+        - Rain: {forecast.precipitation} mm
 
-Give:
-- Safety advice
-- Best time of day
-- Clear explanation
-"""
+        Risk Level: {risk}
 
-        response = self.model.generate_content(prompt)
-        return response.text
+        Give a short, simple safety explanation for outdoor activity.
+        """
+
+        try:
+            response = model.generate_content(prompt)
+            return response.text
+
+        except:
+            # clean fallback (no API message shown)
+            return "AI insight is currently unavailable."

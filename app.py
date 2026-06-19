@@ -6,18 +6,18 @@ import re
 from weather_client import WeatherClient
 from analyzer import ActivityRiskAnalyzer
 
-
+# ---------------------------
 # PAGE CONFIG
-
+# ---------------------------
 st.set_page_config(
     page_title="Weather Risk & Outdoor Activity Planner",
     page_icon="🌦",
     layout="wide"
 )
 
-
+# ---------------------------
 # FILE SETUP
-
+# ---------------------------
 if not os.path.exists("history.json"):
     with open("history.json", "w") as f:
         json.dump([], f)
@@ -26,120 +26,77 @@ if not os.path.exists("favorites.json"):
     with open("favorites.json", "w") as f:
         json.dump([], f)
 
+# ---------------------------
+# TITLE
+# ---------------------------
+st.title("🌦 Weather Risk & Outdoor Activity Planner")
+st.subheader("Weather Safety Dashboard")
 
-# CUSTOM UI
-
-st.markdown("""
-<style>
-.main-title{
-    text-align:center;
-    font-size:36px;
-    font-weight:bold;
-    color:#1f77b4;
-}
-.sub-title{
-    text-align:center;
-    color:gray;
-    margin-bottom:25px;
-}
-.card{
-    background:#f7f9fc;
-    padding:15px;
-    border-radius:12px;
-    box-shadow:0px 2px 8px rgba(0,0,0,0.08);
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown(
-    '<div class="main-title">🌦 Weather Risk & Outdoor Activity Planner</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    '<div class="sub-title">Weather Safety Dashboard</div>',
-    unsafe_allow_html=True
-)
-
-
+# ---------------------------
 # SIDEBAR
-
+# ---------------------------
 st.sidebar.header("⚙ Control Panel")
 
-location = st.sidebar.text_input(
-    "📍 Enter Any City Worldwide",
-    "London"
-)
+location = st.sidebar.text_input("📍 Enter Any City Worldwide", "Lagos")
 
 activity = st.sidebar.selectbox(
     "🏃 Choose Activity",
-    [
-        "Football",
-        "Jogging",
-        "Farming",
-        "Picnic",
-        "Travel",
-        "Outdoor Event"
-    ]
+    ["Football", "Jogging", "Farming", "Picnic", "Travel", "Outdoor Event"]
 )
 
 analyze_btn = st.sidebar.button("🚀 Analyze Weather")
 
-
+# ---------------------------
 # QUICK CITIES
+# ---------------------------
+st.write("🌍 Quick Cities")
 
-st.markdown("### 🌍 Quick Cities")
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-c1, c2, c3, c4, c5, c6 = st.columns(6)
-
-with c1:
+with col1:
     if st.button("London"):
         location = "London"
 
-with c2:
+with col2:
     if st.button("Tokyo"):
         location = "Tokyo"
 
-with c3:
+with col3:
     if st.button("Dubai"):
         location = "Dubai"
 
-with c4:
+with col4:
     if st.button("Lagos"):
         location = "Lagos"
 
-with c5:
+with col5:
     if st.button("Paris"):
         location = "Paris"
 
-with c6:
+with col6:
     if st.button("Abuja"):
         location = "Abuja"
 
-
-# MAIN ANALYSIS
-
+# ---------------------------
+# MAIN LOGIC
+# ---------------------------
 if analyze_btn:
 
     try:
-        clean_location = re.sub(
-            r"[^a-zA-Z\s,]",
-            "",
-            location
-        ).strip()
+        clean_location = re.sub(r"[^a-zA-Z\s,]", "", location).strip()
 
-        weather = WeatherClient()
-        forecast = weather.get_weather(clean_location)
+        weather_client = WeatherClient()
+        forecast = weather_client.get_weather(clean_location)
 
         analyzer = ActivityRiskAnalyzer()
         risk = analyzer.analyze(activity, forecast)
 
-       
+        # ---------------------------
         # WEATHER OVERVIEW
-       
+        # ---------------------------
         st.subheader("🌤 Weather Overview")
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
             st.info(f"📍 {clean_location}")
@@ -150,41 +107,31 @@ if analyze_btn:
         with col3:
             st.warning(f"💨 {forecast.wind_speed} km/h")
 
-       
+        with col4:
+            st.error(f"🌧 {forecast.precipitation} mm")
+
+        st.write("🌧 Rain Status:", forecast.precipitation)
+
+        # ---------------------------
         # RISK ANALYSIS
-        
+        # ---------------------------
         st.subheader("⚠ Risk Analysis")
 
         if risk == "Safe":
             st.success("🟢 Risk Level: SAFE")
             advice = "Weather is good for outdoor activities."
-            best_time = "Morning or Evening"
-
         elif risk == "Manageable":
             st.warning("🟡 Risk Level: MANAGEABLE")
             advice = "Be careful outdoors."
-            best_time = "Morning Only"
-
         else:
             st.error("🔴 Risk Level: RISKY")
             advice = "Avoid outdoor activity."
-            best_time = "Not Recommended"
 
-        
-        # ADVICE
-        
-        st.subheader("💡 Safety Advice")
-        st.write(advice)
+        st.write("💡 Advice:", advice)
 
-        
-        # BEST TIME
-       
-        st.subheader("⏰ Best Time")
-        st.write(best_time)
-
-        
-        # CHECKLIST
-       
+        # ---------------------------
+        # 🎒 PACKING CHECKLIST
+        # ---------------------------
         st.subheader("🎒 Packing Checklist")
 
         items = [
@@ -194,30 +141,53 @@ if analyze_btn:
             "Cap / Hat"
         ]
 
-        if risk != "Safe":
+        if forecast.precipitation > 0:
             items.append("Umbrella / Raincoat")
 
         for item in items:
             st.write("✔", item)
 
-       
-        # GEMINI PLACEHOLDER
-        
+        # ---------------------------
+        # 🤖 GEMINI AI ASSISTANT
+        # ---------------------------
         st.subheader("🤖 Gemini AI Assistant")
 
-        user_question = st.text_input(
-            "Ask AI about weather or safety"
-        )
+        user_question = st.text_input("Ask AI about weather or safety")
 
         if user_question:
-            st.info(
-                "🤖 Gemini AI is currently unavailable. Using system recommendations."
-            )
-            st.write(advice)
+            try:
+                from gemini_client import GeminiClient
 
-    
-        # SAVE HISTORY
-       
+                gemini = GeminiClient()
+
+                ai_response = gemini.explain(
+                    clean_location,
+                    activity,
+                    forecast,
+                    risk
+                )
+
+                st.write(ai_response)
+
+            except:
+                st.info("🤖 AI Assistant is currently unavailable")
+
+        # ---------------------------
+        # 📊 WEATHER CHART
+        # ---------------------------
+        st.subheader("📊 Weather Chart")
+
+        chart_data = {
+            "Temperature": [forecast.temperature],
+            "Wind Speed": [forecast.wind_speed],
+            "Rain": [forecast.precipitation]
+        }
+
+        st.bar_chart(chart_data)
+
+        # ---------------------------
+        # HISTORY
+        # ---------------------------
         with open("history.json", "r") as f:
             history = json.load(f)
 
@@ -232,24 +202,12 @@ if analyze_btn:
 
         st.success("Saved to history ✔")
 
-        
-        # CHART
-      
-        st.subheader("📊 Weather Chart")
-
-        chart_data = {
-            "Temperature": [forecast.temperature],
-            "Wind Speed": [forecast.wind_speed]
-        }
-
-        st.bar_chart(chart_data)
-
     except Exception as e:
         st.error(f"Error: {e}")
 
-
-# FAVORITES
-
+# ---------------------------
+# ⭐ FAVORITES
+# ---------------------------
 st.subheader("⭐ Favorites")
 
 if st.button("Save Favourite"):
@@ -264,16 +222,16 @@ if st.button("Save Favourite"):
 
     st.success("Saved ✔")
 
-
-# HISTORY
-
+# ---------------------------
+# 📜 HISTORY DISPLAY
+# ---------------------------
 with st.expander("📜 History"):
     with open("history.json", "r") as f:
         st.json(json.load(f))
 
-
-# FAVORITES LIST
-
+# ---------------------------
+# ⭐ FAVORITES DISPLAY
+# ---------------------------
 with st.expander("⭐ Favorites"):
     with open("favorites.json", "r") as f:
         st.json(json.load(f))
