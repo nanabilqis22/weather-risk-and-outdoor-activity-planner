@@ -1,9 +1,14 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Read API key from Streamlit Secrets
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
+try:
+    model = genai.GenerativeModel("gemini-3.5-flash")
+    response = model.generate_content("Hello")
+    st.write("Gemini Model Working")
+except Exception as e:
+    st.error(f"Model Error: {e}")
 model = genai.GenerativeModel("gemini-3.5-flash")
 
 
