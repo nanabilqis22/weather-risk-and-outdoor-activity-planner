@@ -1,36 +1,45 @@
+import streamlit as st
 import google.generativeai as genai
 
-API_KEY = "YOUR_GEMINI_API_KEY"
-
-genai.configure(api_key=API_KEY)
+# Read API key from Streamlit Secrets
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 class GeminiClient:
 
-    def explain(self, location, activity, forecast, risk):
+    def explain(
+        self,
+        location,
+        activity,
+        forecast,
+        risk,
+        user_question
+    ):
 
         prompt = f"""
-        You are a weather assistant.
+        You are an intelligent weather and safety assistant.
 
         Location: {location}
         Activity: {activity}
 
         Weather:
         - Temperature: {forecast.temperature}°C
-        - Wind: {forecast.wind_speed} km/h
-        - Rain: {forecast.precipitation} mm
+        - Wind Speed: {forecast.wind_speed} km/h
+        - Rainfall: {forecast.precipitation} mm
 
         Risk Level: {risk}
 
-        Give a short, simple safety explanation for outdoor activity.
+        User Question:
+        {user_question}
+
+        Give a helpful answer based on the weather data above.
         """
 
         try:
             response = model.generate_content(prompt)
             return response.text
 
-        except:
-            # clean fallback (no API message shown)
-            return "AI insight is currently unavailable."
+        except Exception as e:
+            return f"Gemini Error: {e}"

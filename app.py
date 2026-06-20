@@ -53,29 +53,13 @@ st.write("🌍 Quick Cities")
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-with col1:
-    if st.button("London"):
-        location = "London"
-
-with col2:
-    if st.button("Tokyo"):
-        location = "Tokyo"
-
-with col3:
-    if st.button("Dubai"):
-        location = "Dubai"
-
-with col4:
-    if st.button("Lagos"):
-        location = "Lagos"
-
-with col5:
-    if st.button("Paris"):
-        location = "Paris"
-
-with col6:
-    if st.button("Abuja"):
-        location = "Abuja"
+for name, col in zip(
+    ["London", "Tokyo", "Dubai", "Lagos", "Paris", "Abuja"],
+    [col1, col2, col3, col4, col5, col6]
+):
+    with col:
+        if st.button(name):
+            location = name
 
 # ---------------------------
 # MAIN LOGIC
@@ -110,8 +94,6 @@ if analyze_btn:
         with col4:
             st.error(f"🌧 {forecast.precipitation} mm")
 
-        st.write("🌧 Rain Status:", forecast.precipitation)
-
         # ---------------------------
         # RISK ANALYSIS
         # ---------------------------
@@ -130,68 +112,26 @@ if analyze_btn:
         st.write("💡 Advice:", advice)
 
         # ---------------------------
-        # 🎒 PACKING CHECKLIST
+        # PACKING LIST
         # ---------------------------
         st.subheader("🎒 Packing Checklist")
 
+        items = []
+
         if activity == "Football":
-            items = [
-                "Football boots",
-                "Jersey",
-                "Water bottle",
-                "Shin guards"
-            ]
-
+            items = ["Football boots", "Jersey", "Water bottle", "Shin guards"]
         elif activity == "Jogging":
-            items = [
-                "Running shoes",
-                "Water bottle",
-                "Fitness tracker",
-                "Towel"
-            ]
-
+            items = ["Running shoes", "Water bottle", "Fitness tracker", "Towel"]
         elif activity == "Farming":
-            items = [
-                "Hat",
-                "Gloves",
-                "Boots",
-                "Sunscreen",
-                "Water bottle"
-            ]
-
+            items = ["Hat", "Gloves", "Boots", "Sunscreen", "Water bottle"]
         elif activity == "Picnic":
-            items = [
-                "Food",
-                "Water",
-                "Blanket",
-                "Napkins",
-                "Sunscreen"
-            ]
-
+            items = ["Food", "Water", "Blanket", "Napkins", "Sunscreen"]
         elif activity == "Travel":
-            items = [
-                "ID Card",
-                "Phone Charger",
-                "Water",
-                "Passport",
-                "Headphones"
-            ]
-
+            items = ["ID Card", "Phone Charger", "Water", "Passport", "Headphones"]
         elif activity == "Outdoor Event":
-            items = [
-                "Umbrella",
-                "Water",
-                "Sunscreen",
-                "Folding Chair",
-                "Sunglasses"
-            ]
-
+            items = ["Umbrella", "Water", "Sunscreen", "Folding Chair", "Sunglasses"]
         else:
-            items = [
-                "Water Bottle",
-                "Phone",
-                "Comfortable Clothes"
-            ]
+            items = ["Water Bottle", "Phone", "Comfortable Clothes"]
 
         if forecast.precipitation > 0:
             items.append("Raincoat")
@@ -200,7 +140,7 @@ if analyze_btn:
             st.write(f"✔ {item}")
 
         # ---------------------------
-        # 🤖 GEMINI AI ASSISTANT
+        # GEMINI AI
         # ---------------------------
         st.subheader("🤖 Gemini AI Assistant")
 
@@ -216,16 +156,17 @@ if analyze_btn:
                     clean_location,
                     activity,
                     forecast,
-                    risk
+                    risk,
+                    user_question
                 )
 
                 st.info(ai_response)
 
-            except Exception:
-                st.warning("🤖 AI Assistant is currently unavailable")
+            except Exception as e:
+                st.error(f"Gemini Error: {e}")
 
         # ---------------------------
-        # 📊 WEATHER CHART
+        # CHART
         # ---------------------------
         st.subheader("📊 Weather Chart")
 
@@ -238,52 +179,49 @@ if analyze_btn:
         st.bar_chart(chart_data)
 
         # ---------------------------
-        # HISTORY
+        # HISTORY SAVE (FIXED - INSIDE BUTTON)
         # ---------------------------
-        with open("history.json", "r") as f:
-            history = json.load(f)
+        try:
+            with open("history.json", "r") as f:
+                history = json.load(f)
 
-        history.append({
-            "location": clean_location,
-            "activity": activity,
-            "risk": risk
-        })
+            history.append({
+                "location": clean_location,
+                "activity": activity,
+                "risk": risk
+            })
 
-        with open("history.json", "w") as f:
-            json.dump(history, f, indent=4)
+            with open("history.json", "w") as f:
+                json.dump(history, f, indent=4)
 
-        st.success("Saved to history ✔")
+            st.success("Saved to history ✔")
+
+        except Exception as e:
+            st.error(f"History Error: {e}")
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"App Error: {e}")
 
 # ---------------------------
-# ⭐ FAVORITES
-# ---------------------------
-st.subheader("⭐ Favorites")
-
-if st.button("Save Favourite"):
-
-    with open("favorites.json", "r") as f:
-        fav = json.load(f)
-
-    fav.append(location)
-
-    with open("favorites.json", "w") as f:
-        json.dump(fav, f, indent=4)
-
-    st.success("Saved ✔")
-
-# ---------------------------
-# 📜 HISTORY DISPLAY
+# 📜 HISTORY DISPLAY (OUTSIDE BUTTON)
 # ---------------------------
 with st.expander("📜 History"):
-    with open("history.json", "r") as f:
-        st.json(json.load(f))
+    try:
+        with open("history.json", "r") as f:
+            history = json.load(f)
+        st.json(history)
+
+    except:
+        st.info("No history yet.")
 
 # ---------------------------
-# ⭐ FAVORITES DISPLAY
+# ⭐ FAVORITES DISPLAY (OUTSIDE BUTTON)
 # ---------------------------
 with st.expander("⭐ Favorites"):
-    with open("favorites.json", "r") as f:
-        st.json(json.load(f))
+    try:
+        with open("favorites.json", "r") as f:
+            favorites = json.load(f)
+        st.json(favorites)
+
+    except:
+        st.info("No favorites yet.")
