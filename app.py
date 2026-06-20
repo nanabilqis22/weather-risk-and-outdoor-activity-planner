@@ -16,6 +16,21 @@ st.set_page_config(
 )
 
 # ---------------------------
+# SESSION STATE
+# ---------------------------
+if "forecast" not in st.session_state:
+    st.session_state.forecast = None
+
+if "risk" not in st.session_state:
+    st.session_state.risk = None
+
+if "location" not in st.session_state:
+    st.session_state.location = None
+
+if "activity" not in st.session_state:
+    st.session_state.activity = None
+
+# ---------------------------
 # FILE SETUP
 # ---------------------------
 if not os.path.exists("history.json"):
@@ -74,6 +89,12 @@ if analyze_btn:
 
         analyzer = ActivityRiskAnalyzer()
         risk = analyzer.analyze(activity, forecast)
+
+        # Save for Gemini
+        st.session_state.forecast = forecast
+        st.session_state.risk = risk
+        st.session_state.location = clean_location
+        st.session_state.activity = activity
 
         # ---------------------------
         # WEATHER OVERVIEW
@@ -163,7 +184,7 @@ if analyze_btn:
                 st.info(ai_response)
 
             except Exception as e:
-                st.error(f"Gemini Error: {e}")
+                st.error(f"Gemini Error: {e}")       
 
         # ---------------------------
         # CHART
