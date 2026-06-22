@@ -27,8 +27,8 @@ if "activity" not in st.session_state:
     st.session_state.activity = None
 
 # SESSION STATE INITIALIZATION
-if "city_input" not in st.session_state:
-    st.session_state.city_input = "Lagos" 
+if "selected_city" not in st.session_state:
+    st.session_state.selected_city = "Abuja" 
 
 # FILE SETUP
 if not os.path.exists("history.json"):
@@ -47,8 +47,8 @@ st.subheader("Weather Safety Dashboard")
 st.sidebar.header("⚙ Control Panel")
 
 # Use a default state hook to tie quick-city selections smoothly
-default_city = "Lagos"
-location = st.sidebar.text_input("📍 Enter Any City Worldwide", key="city_input")
+default_city = "Abuja"
+location = st.sidebar.text_input("📍 Enter Any City Worldwide", value="st.session_state.selected_city")
 
 activity = st.sidebar.selectbox(
     "🏃 Choose Activity",
@@ -68,8 +68,36 @@ for name, col in zip(
 ):
     with col:
         if st.button(name):
-            st.session_state.city_input = name
-            st.rerun
+            st.session_state.selected_city = name
+            
+            try:
+                clean_location = re.sub(r"[^a-zA-Z\s,]", "", name).strip()
+
+                weather_client = WeatherClient()
+                forecast = weather_client.get_weather(clean_location)
+
+                analyzer = ActivityRiskAnalyzer()
+                risk = analyzer.analyze(activity, forecast)
+
+                st.session_state.forecast = forecast
+                st.session_state.risk = risk
+                st.session_state.location = clean_location
+                st.session_state.activity = activity
+
+                with open("history.json", "r") as f:
+                    history = json.load(f)
+                history.append({
+                    "location": clean_location,
+                    "activity": activity,
+                    "risk": risk
+                })
+                with open("history.json", "w") as f:
+                    json.dump(history, f, indent=4)
+
+            except Exception as e:
+                st.error(f"Quick City Processing Error: {e}")
+            st.rerun()
+            
 
 # MAIN LOGIC (WEATHER ANALYSIS)
 if analyze_btn:
