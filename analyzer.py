@@ -1,5 +1,5 @@
 class ActivityRiskAnalyzer:
-    
+ 
     def analyze(self, activity, forecast):
 
         temp = forecast.temperature
@@ -13,5 +13,4 @@ class ActivityRiskAnalyzer:
             return "Manageable"
         else:
             return "Safe"
-        
         
