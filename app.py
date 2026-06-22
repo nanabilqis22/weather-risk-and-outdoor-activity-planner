@@ -26,6 +26,10 @@ if "location" not in st.session_state:
 if "activity" not in st.session_state:
     st.session_state.activity = None
 
+# SESSION STATE INITIALIZATION
+if "city_input" not in st.session_state:
+    st.session_state.city_input = "Lagos" 
+
 # FILE SETUP
 if not os.path.exists("history.json"):
     with open("history.json", "w") as f:
@@ -44,7 +48,7 @@ st.sidebar.header("⚙ Control Panel")
 
 # Use a default state hook to tie quick-city selections smoothly
 default_city = "Lagos"
-location = st.sidebar.text_input("📍 Enter Any City Worldwide", default_city)
+location = st.sidebar.text_input("📍 Enter Any City Worldwide", key="city_input")
 
 activity = st.sidebar.selectbox(
     "🏃 Choose Activity",
@@ -64,7 +68,8 @@ for name, col in zip(
 ):
     with col:
         if st.button(name):
-            location = name
+            st.session_state.city_input = name
+            st.rerun
 
 # MAIN LOGIC (WEATHER ANALYSIS)
 if analyze_btn:
