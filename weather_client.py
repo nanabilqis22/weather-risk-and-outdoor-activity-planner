@@ -23,7 +23,7 @@ class WeatherClient:
         url = (
             f"https://api.open-meteo.com/v1/forecast?"
             f"latitude={lat}&longitude={lon}"
-            f"&current=temperature_2m,wind_speed_10m"
+            f"&current=temperature_2m,wind_speed_10m,precipitation"
         )
 
         response = requests.get(url)
@@ -31,9 +31,10 @@ class WeatherClient:
 
         temp = data["current"]["temperature_2m"]
         wind = data["current"]["wind_speed_10m"]
+        rain = data["current"]["precipitation"]
 
         return Forecast(
             temperature=temp,
             wind_speed=wind,
-            precipitation=0
+            precipitation=rain
         )
