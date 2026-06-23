@@ -1,20 +1,4 @@
-# class ActivityRiskAnalyzer:
- 
-#     def analyze(self, activity, forecast):
-
-#         temp = forecast.temperature
-#         wind = forecast.wind_speed
-
-#         if wind > 25:
-#             return "Risky"
-#         elif temp > 35:
-#             return "Risky"
-#         elif temp < 15:
-#             return "Manageable"
-#         else:
-#             return "Safe"
-        
-
+  
 class ActivityRiskAnalyzer:
 
     # Activities that are sensitive to specific conditions
@@ -29,8 +13,6 @@ class ActivityRiskAnalyzer:
         wind = forecast.wind_speed
         rain = forecast.precipitation
 
-        # --- Base weather rules (apply to everyone) ---
-
         if temp < 5:
             return "Risky"
 
@@ -40,7 +22,7 @@ class ActivityRiskAnalyzer:
         if temp > 38:
             return "Risky"
 
-        # --- Activity-specific rules ---
+        # --- sensitive activities ---
 
         if activity in self.WIND_SENSITIVE and wind > 18:
             return "Risky"
