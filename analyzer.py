@@ -1,4 +1,11 @@
+  
 class ActivityRiskAnalyzer:
+
+    # Activities that are sensitive to specific conditions
+    WIND_SENSITIVE = ["Football", "Outdoor Event", "Picnic"]
+    HEAT_SENSITIVE = ["Jogging", "Farming", "Football"]
+    COLD_SENSITIVE = ["Jogging", "Farming", "Picnic"]
+    RAIN_SENSITIVE = ["Picnic", "Outdoor Event", "Travel"]
 
     def analyze(self, activity, forecast):
 
@@ -6,99 +13,33 @@ class ActivityRiskAnalyzer:
         wind = forecast.wind_speed
         rain = forecast.precipitation
 
-        activity = activity.lower()
+        if temp < 5:
+            return "Risky"
 
-        # FOOTBALL
-        if activity == "football":
+        if wind > 25:
+            return "Risky"
 
-            if rain >= 5:
-                return "Avoid"
+        if temp > 38:
+            return "Risky"
 
-            if rain > 0:
-                return "Risky"
+        # --- sensitive activities ---
 
-            if wind > 30:
-                return "Risky"
+        if activity in self.WIND_SENSITIVE and wind > 18:
+            return "Risky"
 
-            return "Safe"
+        if activity in self.HEAT_SENSITIVE and temp > 32:
+            return "Risky"
 
-        # JOGGING
-        elif activity == "jogging":
+        if activity in self.COLD_SENSITIVE and temp < 15:
+            return "Risky"
 
-            if rain > 0:
-                return "Risky"
+        if activity in self.RAIN_SENSITIVE and rain > 0:
+            return "Manageable"
 
-            if temp > 35:
-                return "Risky"
+        if temp < 15 or temp > 32:
+            return "Manageable"
 
-            if temp < 10:
-                return "Risky"
+        if wind > 15:
+            return "Manageable"
 
-            return "Safe"
-
-        # PICNIC
-        elif activity == "picnic":
-
-            if rain > 0:
-                return "Avoid"
-
-            if wind > 25:
-                return "Risky"
-
-            return "Safe"
-
-        # FARMING
-        elif activity == "farming":
-
-            if rain >= 2:
-                return "Safe"
-
-            if rain > 0:
-                return "Manageable"
-
-            return "Irrigation Needed"
-
-        # TRAVELLING
-        elif activity == "travelling":
-
-            if rain >= 10:
-                return "Avoid"
-
-            if rain > 0:
-                return "Risky"
-
-            if wind > 35:
-                return "Risky"
-
-            return "Safe"
-
-        # OUTDOOR EVENT
-        elif activity == "outdoor event":
-
-            if rain >= 5:
-                return "Avoid"
-
-            if rain > 0:
-                return "Risky"
-
-            if wind > 25:
-                return "Risky"
-
-            return "Safe"
-
-        # DEFAULT
-        else:
-
-            if rain >= 5:
-                return "Avoid"
-
-            if rain > 0:
-                return "Risky"
-
-            if temp > 38 or temp < 12:
-                return "Risky"
-
-            if wind > 25:
-                return "Risky"
-
-            return "Safe"
+        return "Safe"

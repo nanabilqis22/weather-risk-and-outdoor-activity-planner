@@ -6,18 +6,14 @@ import re
 from weather_client import WeatherClient
 from analyzer import ActivityRiskAnalyzer
 
-# ---------------------------
 # PAGE CONFIG
-# ---------------------------
 st.set_page_config(
     page_title="Weather Risk & Outdoor Activity Planner",
     page_icon="🌦",
     layout="wide"
 )
 
-# ---------------------------
 # SESSION STATE INITIALIZATION
-# ---------------------------
 if "forecast" not in st.session_state:
     st.session_state.forecast = None
 
@@ -30,9 +26,11 @@ if "location" not in st.session_state:
 if "activity" not in st.session_state:
     st.session_state.activity = None
 
-# ---------------------------
+# SESSION STATE INITIALIZATION
+if "city_input" not in st.session_state:
+    st.session_state.selected_city = "Abuja" 
+
 # FILE SETUP
-# ---------------------------
 if not os.path.exists("history.json"):
     with open("history.json", "w") as f:
         json.dump([], f)
@@ -41,20 +39,19 @@ if not os.path.exists("favorites.json"):
     with open("favorites.json", "w") as f:
         json.dump([], f)
 
-# ---------------------------
 # TITLE
-# ---------------------------
 st.title("🌦 Weather Risk & Outdoor Activity Planner")
 st.subheader("Weather Safety Dashboard")
 
-# ---------------------------
 # SIDEBAR
-# ---------------------------
 st.sidebar.header("⚙ Control Panel")
 
 # Use a default state hook to tie quick-city selections 
 default_city = "Lagos"
-location = st.sidebar.text_input("📍 Enter Any City Worldwide", default_city)
+location = st.sidebar.text_input(
+    "📍 Enter Any City Worldwide",
+    value=st.session_state.selected_city
+)
 
 activity = st.sidebar.selectbox(
     "🏃 Choose Activity",
@@ -63,9 +60,7 @@ activity = st.sidebar.selectbox(
 
 analyze_btn = st.sidebar.button("🚀 Analyze Weather")
 
-# ---------------------------
 # QUICK CITIES
-# ---------------------------
 st.write("🌍 Quick Cities")
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
@@ -76,11 +71,37 @@ for name, col in zip(
 ):
     with col:
         if st.button(name):
-            location = name
+            st.session_state.selected_city = name
+            
+            try:
+                clean_location = re.sub(r"[^a-zA-Z\s,]", "", name).strip()
 
-# ---------------------------
+                weather_client = WeatherClient()
+                forecast = weather_client.get_weather(clean_location)
+
+                analyzer = ActivityRiskAnalyzer()
+                risk = analyzer.analyze(activity, forecast)
+
+                st.session_state.forecast = forecast
+                st.session_state.risk = risk
+                st.session_state.location = clean_location
+                st.session_state.activity = activity
+
+                with open("history.json", "r") as f:
+                    history = json.load(f)
+                history.append({
+                    "location": clean_location,
+                    "activity": activity,
+                    "risk": risk
+                })
+                with open("history.json", "w") as f:
+                    json.dump(history, f, indent=4)
+
+            except Exception as e:
+                st.error(f"Quick City Processing Error: {e}")
+            st.rerun()
+
 # MAIN LOGIC (WEATHER ANALYSIS)
-# ---------------------------
 if analyze_btn:
     try:
         clean_location = re.sub(r"[^a-zA-Z\s,]", "", location).strip()
@@ -117,9 +138,7 @@ if analyze_btn:
     except Exception as e:
         st.error(f"App Error: {e}")
 
-# ---------------------------
 # DISPLAY RESULTS (IF STATE EXISTS)
-# ---------------------------
 if st.session_state.forecast:
     # Shortcuts for easier code management below
     f_state = st.session_state.forecast
@@ -127,9 +146,7 @@ if st.session_state.forecast:
     loc_state = st.session_state.location
     act_state = st.session_state.activity
 
-    # ---------------------------
-    # WEATHER OVERVIEW
-    # ---------------------------
+    # Weather Overview
     st.subheader("🌤 Weather Overview")
 
     col1, col2, col3, col4 = st.columns(4)
@@ -142,9 +159,7 @@ if st.session_state.forecast:
     with col4:
         st.error(f"🌧 {f_state.precipitation} mm")
 
-    # ---------------------------
     # RISK ANALYSIS
-    # ---------------------------
     st.subheader("⚠ Risk Analysis")
 
     if r_state == "Safe":
@@ -159,9 +174,7 @@ if st.session_state.forecast:
 
     st.write("💡 Advice:", advice)
 
-    # ---------------------------
     # PACKING LIST
-    # ---------------------------
     st.subheader("🎒 Packing Checklist")
 
     items = []
@@ -186,9 +199,7 @@ if st.session_state.forecast:
     for item in items:
         st.write(f"✔ {item}")
 
-    # ---------------------------
     # CHART
-    # ---------------------------
     st.subheader("📊 Weather Chart")
 
     chart_data = {
@@ -198,9 +209,7 @@ if st.session_state.forecast:
     }
     st.bar_chart(chart_data)
 
-    # ---------------------------
     # GEMINI AI ASSISTANT (PERSISTENT OUTSIDE BUTTON CLICK)
-    # ---------------------------
     st.markdown("---")
     st.subheader("🤖 Gemini AI Assistant")
 
@@ -226,10 +235,8 @@ if st.session_state.forecast:
                     st.error(f"Gemini UI Error: {e}")
         else:
             st.warning("Please enter a question first!")
-
-# ---------------------------
+            
 # 📜 HISTORY DISPLAY
-# ---------------------------
 with st.expander("📜 History"):
     try:
         with open("history.json", "r") as f:
@@ -238,9 +245,7 @@ with st.expander("📜 History"):
     except:
         st.info("No history yet.")
 
-# ---------------------------
 # ⭐ FAVORITES DISPLAY
-# ---------------------------
 with st.expander("⭐ Favorites"):
     try:
         with open("favorites.json", "r") as f:
