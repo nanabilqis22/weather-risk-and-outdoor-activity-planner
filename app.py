@@ -52,7 +52,7 @@ st.subheader("Weather Safety Dashboard")
 # ---------------------------
 st.sidebar.header("⚙ Control Panel")
 
-# Use a default state hook to tie quick-city selections smoothly
+# Use a default state hook to tie quick-city selections 
 default_city = "Lagos"
 location = st.sidebar.text_input("📍 Enter Any City Worldwide", default_city)
 
